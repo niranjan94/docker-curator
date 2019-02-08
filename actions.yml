@@ -1,0 +1,94 @@
+---
+actions:
+  1:
+    action: delete_indices
+    description: >-
+      Delete logstash indices older than specified time period
+    options:
+      ignore_empty_list: True
+      disable_action: ${DISABLE_LOGSTASH_ACTION:False}
+    filters:
+      - filtertype: pattern
+        kind: prefix
+        value: ${LOGSTASH_PREFIX:logstash-}
+      - filtertype: age
+        source: name
+        direction: older
+        timestring: '%Y.%m.%d'
+        unit: ${LOGSTASH_UNIT:months}
+        unit_count: ${LOGSTASH_UNIT_COUNT:12}
+  2:
+    action: delete_indices
+    description: >-
+      Delete regex-based indices older than specified time period (based on index name)
+    options:
+      ignore_empty_list: True
+      disable_action: ${DISABLE_REGEX_ACTION:True}
+    filters:
+      - filtertype: pattern
+        kind: prefix
+        value: ${REGEX_PATTERN:_____}
+      - filtertype: age
+        source: name
+        direction: older
+        timestring: '%Y-%m-%d'
+        unit: ${REGEX_UNIT:months}
+        unit_count: ${REGEX_UNIT_COUNT:12}
+  3:
+    action: forcemerge
+    description: >-
+      forceMerge logstash- prefixed indices older than 2 days (based on index
+      creation_date) to 2 segments per shard.  Delay 120 seconds between each
+      forceMerge operation to allow the cluster to quiesce. Skip indices that
+      have already been force merged to the minimum number of segments to avoid
+      reprocessing.
+    options:
+      max_num_segments: 2
+      delay: 120
+      timeout_override:
+      continue_if_exception: False
+      disable_action: ${DISABLE_LOGSTASH_FM_ACTION:True}
+    filters:
+      - filtertype: pattern
+        kind: prefix
+        value: ${LOGSTASH_PREFIX:logstash-}
+        exclude:
+      - filtertype: age
+        source: creation_date
+        direction: older
+        unit: days
+        unit_count: 2
+        exclude:
+      - filtertype: forcemerged
+        max_num_segments: 2
+        exclude:
+
+  4:
+    action: forcemerge
+    description: >-
+      forceMerge logstash- prefixed indices older than 2 days (based on index
+      creation_date) to 2 segments per shard.  Delay 120 seconds between each
+      forceMerge operation to allow the cluster to quiesce. Skip indices that
+      have already been force merged to the minimum number of segments to avoid
+      reprocessing.
+    options:
+      max_num_segments: 2
+      delay: 120
+      timeout_override:
+      continue_if_exception: False
+      disable_action: ${DISABLE_REGEX_FM_ACTION:True}
+    filters:
+      - filtertype: pattern
+        kind: prefix
+        value: ${REGEX_PATTERN:_____}
+        exclude:
+      - filtertype: age
+        source: creation_date
+        direction: older
+        unit: days
+        unit_count: 2
+        exclude:
+      - filtertype: forcemerged
+        max_num_segments: 2
+        exclude:
+

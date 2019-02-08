@@ -1,0 +1,14 @@
+---
+client:
+  hosts:
+    - ${ES_HOST:127.0.0.1}
+  port: ${ES_PORT:9200}
+  use_ssl: ${ES_SSL:False}
+  ssl_no_validate: ${ES_SSL_NO_VALIDATE:True}
+  timeout: ${ES_TIMEOUT:30}
+
+logging:
+  loglevel: ${LOG_LEVEL:INFO}
+  logfile:
+  logformat: default
+  blacklist: ['elasticsearch', 'urllib3']
